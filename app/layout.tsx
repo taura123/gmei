@@ -60,6 +60,9 @@ export const metadata: Metadata = {
     shortcut: "/images/LOGO/LOGO GMEI (1).png",
     apple: "/images/LOGO/LOGO GMEI (1).png",
   },
+  verification: {
+    google: "tXrgEGJMzgGUgyqFZDMToX7bNeXsr-SHs8qkeHwDanY",
+  },
 };
 
 
