@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
-const BASE_URL = "https://gramedia-edukasi.co.id";
+const BASE_URL = "https://gmei.vercel.app";
 
 export const dynamic = "force-dynamic";
 
