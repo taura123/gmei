@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          String    @default("Admin")  // "Super Admin" | "Admin" | "Editor"
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  price       Decimal?
+  image       String
+  category    String   // "Educational Books" | "Non-Book Products"
+  subcategory String?  // "BTP", "BTU", "APE", etc.
+  link        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model News {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  content     String   // Formatted text for detail page
+  image       String
+  category    String?  // "Press Release", "Education", "Company"
+  author      String?  @default("Admin Gramedia")
+  date        DateTime @default(now())
+  sourceId    String?  @unique // For RSS Sync
+  isExternal  Boolean  @default(false)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  content     String   // Formatted text for detail page
+  image       String
+  date        DateTime
+  location    String?
+  type        String   // "Upcoming" | "Past"
+  link        String?  // Registration link
+  sourceId    String?  @unique // For RSS Sync
+  isExternal  Boolean  @default(false)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  phone     String
+  email     String?
+  isMain    Boolean  @default(false)
+  lat       Float?
+  lng       Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  action    String   // "CREATE", "DELETE", "SYNC"
+  target    String   // "PRODUCT", "NEWS", "EVENT"
+  details   String
+  createdAt DateTime @default(now())
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  status    String   @default("UNREAD") // "UNREAD", "READ", "REPLIED"
+  createdAt DateTime @default(now())
+}
