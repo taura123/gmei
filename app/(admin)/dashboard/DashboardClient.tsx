@@ -412,14 +412,20 @@ export default function DashboardClient() {
                                     const total = Object.values(analyticsData.sources).reduce((a: any, b: any) => a + b, 0) as number;
                                     const percent = ((value / total) * 100).toFixed(0);
                                     const colors = ["bg-blue-600", "bg-purple-500", "bg-emerald-500", "bg-orange-500"];
+
+                                    // Professional mapping for GA4 labels
+                                    const displayLabel = label.toLowerCase() === "(direct)" ? "Direct Traffic" :
+                                        label.toLowerCase() === "(not set)" ? "Unspecified Sources" :
+                                            label.charAt(0).toUpperCase() + label.slice(1);
+
                                     return (
-                                        <div key={i} className="space-y-2">
+                                        <div key={i} className="space-y-2 group cursor-default">
                                             <div className="flex justify-between text-xs font-bold">
-                                                <span className="text-slate-500 capitalize">{label.replace("(direct)", "Direct")}</span>
+                                                <span className="text-slate-500 group-hover:text-slate-900 transition-colors">{displayLabel}</span>
                                                 <span className="text-slate-900">{percent}%</span>
                                             </div>
                                             <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden">
-                                                <div className={`h-full ${colors[i % colors.length]} rounded-full transition-all duration-1000`} style={{ width: `${percent}%` }} />
+                                                <div className={`h-full ${colors[i % colors.length]} rounded-full transition-all duration-1000 group-hover:brightness-110`} style={{ width: `${percent}%` }} />
                                             </div>
                                         </div>
                                     );
@@ -445,12 +451,15 @@ export default function DashboardClient() {
                                 const percent = (val / total) * 100;
 
                                 return (
-                                    <div key={i} className="flex flex-col items-center gap-3 flex-1 h-full justify-end">
-                                        <div className="w-full bg-blue-50 rounded-t-2xl relative group overflow-hidden transition-all duration-1000" style={{ height: `${Math.max(percent, 5)}%` }}>
-                                            <div className="absolute inset-0 bg-blue-600 opacity-20 group-hover:opacity-100 transition-opacity" />
-                                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-black text-blue-600">{percent.toFixed(0)}%</div>
+                                    <div key={i} className="flex flex-col items-center gap-3 flex-1 h-full justify-end group">
+                                        <div className="w-full bg-blue-50/50 rounded-t-2xl relative transition-all duration-1000" style={{ height: `${Math.max(percent, 5)}%` }}>
+                                            <div className="absolute inset-0 bg-blue-600 opacity-20 group-hover:opacity-100 transition-all duration-500 rounded-t-2xl" />
+                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-2 py-1 rounded-lg text-[9px] font-black opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform translate-y-2 group-hover:translate-y-0 shadow-lg whitespace-nowrap z-20">
+                                                {percent.toFixed(1)}%
+                                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-sm border-transparent border-t-slate-900" />
+                                            </div>
                                         </div>
-                                        <div className="text-slate-400 group-hover:text-blue-600 transition-colors">
+                                        <div className="text-slate-400 group-hover:text-blue-600 transition-all duration-300 group-hover:scale-110">
                                             {dev.icon}
                                         </div>
                                     </div>
