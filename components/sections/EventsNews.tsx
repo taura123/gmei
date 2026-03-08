@@ -18,59 +18,59 @@ const EventsNews = async () => {
     const displayNews = apiNews.slice(0, 1);
 
     return (
-        <section className="py-12 bg-white overflow-hidden selection:bg-blue-100">
-            <div className="container mx-auto px-4 max-w-6xl">
+        <section className="py-12 md:py-20 bg-white overflow-hidden selection:bg-blue-100">
+            <div className="container mx-auto px-4 md:px-6 max-w-6xl">
                 {/* Header: Centered to match ProductShowcase */}
-                <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-10 space-y-2">
-                    <h2 className="text-3xl font-black text-slate-900 leading-tight tracking-tight italic">Event & Berita Terkini</h2>
-                    <p className="text-base text-slate-500 font-semibold max-w-3xl mx-auto leading-relaxed">
+                <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-12 md:mb-16 space-y-4">
+                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight tracking-tight italic">Event & Berita Terkini</h2>
+                    <p className="text-base md:text-lg text-slate-500 font-semibold max-w-2xl mx-auto leading-relaxed px-4">
                         Ikuti berbagai kegiatan edukatif, webinar, kompetisi, dan info terbaru seputar dunia literasi.
                     </p>
                 </div>
 
                 {/* Grid: 3 columns, more compact gap */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
                     {/* REAL-TIME EVENTS FROM API */}
                     {displayEvents.map((event) => (
-                        <Card key={event.id} className="overflow-hidden rounded-[2rem] border-none shadow-lg hover:shadow-xl transition-all duration-500 group flex flex-col h-full bg-white text-slate-900">
-                            <div className="aspect-[16/11] relative bg-slate-50 overflow-hidden shrink-0">
+                        <Card key={event.id} className="overflow-hidden rounded-[2.25rem] border-none shadow-xl hover:shadow-2xl transition-all duration-700 group flex flex-col h-full bg-white text-slate-900 border border-slate-100 hover:-translate-y-2">
+                            <div className="aspect-[16/10] relative bg-slate-50 overflow-hidden shrink-0">
                                 <div className="absolute inset-0">
                                     <ProxyImage
                                         src={event.image}
                                         alt={event.title}
-                                        className="w-full h-full transition-transform duration-700 group-hover:scale-110"
+                                        className="w-full h-full transition-transform duration-1000 group-hover:scale-110"
                                         fallbackSrc="/images/ASET HOME/JPG untuk Website/HOME_SUB MENU ICON-03.jpg"
                                         fill
                                     />
                                 </div>
-                                <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-md flex flex-col items-center min-w-[45px]">
-                                    <span className="text-[9px] font-black text-[#F58220] uppercase tracking-widest">{new Date(event.date).toLocaleDateString('id-ID', { month: 'short' })}</span>
-                                    <span className="text-lg font-black text-slate-900">{new Date(event.date).getDate()}</span>
+                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-xl px-4 py-2 rounded-2xl shadow-xl flex flex-col items-center min-w-[55px]">
+                                    <span className="text-[10px] font-black text-[#F58220] uppercase tracking-[0.2em]">{new Date(event.date).toLocaleDateString('id-ID', { month: 'short' })}</span>
+                                    <span className="text-xl font-black text-slate-900">{new Date(event.date).getDate()}</span>
                                 </div>
                                 {new Date(event.date) >= new Date(new Date().setHours(0, 0, 0, 0)) && (
-                                    <div className="absolute top-3 right-3 bg-[#1E4198] text-white text-[8px] font-black px-2.5 py-1 rounded-full tracking-widest uppercase shadow-md">
+                                    <div className="absolute top-4 right-4 bg-[#1E4198] text-white text-[9px] font-black px-3 py-1.5 rounded-full tracking-widest uppercase shadow-xl">
                                         EVENT
                                     </div>
                                 )}
                             </div>
-                            <CardContent className="p-6 space-y-3 flex flex-col flex-1">
-                                <h3 className="text-lg font-black text-slate-900 line-clamp-2 leading-snug min-h-[2.5rem] group-hover:text-[#1E4198] transition-colors">
+                            <CardContent className="p-8 space-y-4 flex flex-col flex-1">
+                                <h3 className="text-xl font-black text-slate-900 line-clamp-2 leading-tight min-h-[3rem] group-hover:text-[#1E4198] transition-colors uppercase tracking-tight">
                                     {event.title}
                                 </h3>
-                                <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed font-medium">
+                                <p className="text-slate-500 text-[13px] line-clamp-2 leading-relaxed font-medium">
                                     {event.description}
                                 </p>
-                                <div className="pt-2 mt-auto">
+                                <div className="pt-4 mt-auto">
                                     <Link
                                         href={event.link}
                                         target={event.link.startsWith('http') ? "_blank" : "_self"}
                                     >
-                                        <Button className="w-full rounded-xl bg-slate-50 text-slate-900 hover:bg-[#F58220] hover:text-white py-5 h-auto transition-all font-black text-sm border-none shadow-none active:scale-95 group/btn">
+                                        <Button className="w-full rounded-2xl bg-slate-50 text-[#1E4198] hover:bg-[#F58220] hover:text-white py-6 h-auto transition-all font-black text-xs border-none shadow-sm active:scale-95 group/btn uppercase tracking-widest">
                                             Ikuti Sekarang
                                             {event.link.startsWith('http') ? (
-                                                <ExternalLink className="ml-2 h-3.5 w-3.5 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
+                                                <ExternalLink className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
                                             ) : (
-                                                <ArrowRight className="ml-2 h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                                                <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                                             )}
                                         </Button>
                                     </Link>
@@ -81,42 +81,42 @@ const EventsNews = async () => {
 
                     {/* REAL-TIME NEWS FROM API */}
                     {displayNews.map((news) => (
-                        <Card key={news.id} className="overflow-hidden rounded-[2rem] border-none shadow-lg hover:shadow-xl transition-all duration-500 group flex flex-col h-full bg-white text-slate-900">
-                            <div className="aspect-[16/11] relative bg-slate-50 overflow-hidden shrink-0">
+                        <Card key={news.id} className="overflow-hidden rounded-[2.25rem] border-none shadow-xl hover:shadow-2xl transition-all duration-700 group flex flex-col h-full bg-white text-slate-900 border border-slate-100 hover:-translate-y-2">
+                            <div className="aspect-[16/10] relative bg-slate-50 overflow-hidden shrink-0">
                                 <div className="absolute inset-0">
                                     <ProxyImage
                                         src={news.image}
                                         alt={news.title}
-                                        className="w-full h-full transition-transform duration-700 group-hover:scale-110"
+                                        className="w-full h-full transition-transform duration-1000 group-hover:scale-110"
                                         fallbackSrc="/images/ASET HOME/JPG untuk Website/HOME_SUB MENU ICON-02.jpg"
                                         fill
                                     />
                                 </div>
-                                <div className="absolute top-3 left-3 bg-[#1E4198]/90 backdrop-blur-md text-white text-[8px] font-black px-3 py-1.5 rounded-full tracking-widest uppercase shadow-md">
+                                <div className="absolute top-4 left-4 bg-[#1E4198]/90 backdrop-blur-xl text-white text-[9px] font-black px-4 py-2 rounded-full tracking-[0.2em] uppercase shadow-xl">
                                     INFO PENDIDIKAN
                                 </div>
                             </div>
-                            <CardContent className="p-6 space-y-3 flex flex-col flex-1">
-                                <div className="text-[9px] font-black text-slate-400 tracking-widest uppercase mb-1">
+                            <CardContent className="p-8 space-y-4 flex flex-col flex-1">
+                                <div className="text-[10px] font-black text-slate-400 tracking-[0.2em] uppercase mb-1">
                                     {new Date(news.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })}
                                 </div>
-                                <h3 className="text-lg font-black text-slate-900 line-clamp-2 leading-snug min-h-[2.5rem] group-hover:text-[#1E4198] transition-colors">
+                                <h3 className="text-xl font-black text-slate-900 line-clamp-2 leading-tight min-h-[3rem] group-hover:text-[#1E4198] transition-colors uppercase tracking-tight">
                                     {news.title}
                                 </h3>
-                                <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed font-medium">
+                                <p className="text-slate-500 text-[13px] line-clamp-2 leading-relaxed font-medium">
                                     {news.description}
                                 </p>
-                                <div className="pt-4 mt-auto border-t border-slate-50 flex items-center justify-between">
+                                <div className="pt-6 mt-auto border-t border-slate-100 flex items-center justify-between">
                                     <Link
                                         href={news.link}
                                         target={news.link.startsWith('http') ? "_blank" : "_self"}
-                                        className="flex items-center text-[#1E4198] font-black text-xs group/btn w-full justify-between"
+                                        className="flex items-center text-[#1E4198] font-black text-xs group/btn w-full justify-between uppercase tracking-widest hover:text-[#F58220] transition-colors"
                                     >
                                         Baca Selengkapnya
                                         {news.link.startsWith('http') ? (
-                                            <ExternalLink className="h-3.5 w-3.5 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
+                                            <ExternalLink className="h-4 w-4 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
                                         ) : (
-                                            <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                                            <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                                         )}
                                     </Link>
                                 </div>
@@ -126,11 +126,11 @@ const EventsNews = async () => {
                 </div>
 
                 {/* Footer Button: Centered to match ProductShowcase */}
-                <div className="mt-12 text-center">
+                <div className="mt-16 text-center">
                     <Link href="/events">
-                        <Button variant="outline" className="rounded-xl border-2 border-slate-200 px-8 py-5 h-auto text-slate-800 font-black text-lg hover:bg-slate-50 hover:border-slate-300 transition-all shadow-lg group active:scale-95">
-                            Lihat Semua Event & Berita
-                            <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-2" />
+                        <Button variant="outline" className="rounded-2xl border-2 border-slate-200 px-10 py-6 h-auto text-slate-800 font-black text-xl hover:bg-[#1E4198] hover:text-white hover:border-[#1E4198] transition-all shadow-xl group active:scale-95 uppercase tracking-widest mb-10">
+                            Lihat Semua Berita
+                            <ChevronRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-3" />
                         </Button>
                     </Link>
                 </div>
