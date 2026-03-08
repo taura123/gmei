@@ -14,7 +14,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gramedia-edukasi.co.id"),
+  metadataBase: new URL("https://gmei.vercel.app"),
   title: {
     default: "Gramedia Mitra Edukasi Indonesia — Solusi Pendidikan Terpercaya",
     template: "%s | Gramedia Mitra Edukasi Indonesia",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "id_ID",
-    url: "https://gramedia-edukasi.co.id",
+    url: "https://gmei.vercel.app",
     siteName: "Gramedia Mitra Edukasi Indonesia",
     title: "Gramedia Mitra Edukasi Indonesia — Solusi Pendidikan Terpercaya",
     description:
