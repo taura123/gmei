@@ -53,11 +53,11 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md shadow-sm">
-      <div className="max-w-[1440px] mx-auto flex h-20 items-center justify-between px-6 lg:px-12">
+    <nav className="sticky top-0 z-50 w-full border-b bg-white/70 backdrop-blur-xl shadow-sm transition-all duration-300">
+      <div className="max-w-[1440px] mx-auto flex h-16 md:h-20 items-center justify-between px-4 md:px-6 lg:px-12">
         {/* Logo */}
-        <Link href="/" className="flex items-center shrink-0 mr-4">
-          <div className="relative h-12 w-40 md:h-14 md:w-48">
+        <Link href="/" className="flex items-center shrink-0 mr-2 md:mr-4">
+          <div className="relative h-10 w-32 md:h-14 md:w-48 transition-all duration-300">
             <Image
               src="/images/LOGO/LOGO GMEI (1).png"
               alt="Gramedia Mitra Edukasi Indonesia"
@@ -123,13 +123,13 @@ const Navbar = () => {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 top-20 z-40 bg-white lg:hidden overflow-y-auto"
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed inset-0 top-16 z-40 bg-white lg:hidden overflow-y-auto"
           >
-            <div className="p-6 space-y-8 flex flex-col h-[calc(100vh-80px)]">
+            <div className="p-6 pb-12 space-y-8 flex flex-col min-h-[calc(100vh-64px)]">
               {/* Mobile Search */}
               <form onSubmit={handleSearch} className="relative w-full" suppressHydrationWarning>
                 <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -140,7 +140,7 @@ const Navbar = () => {
                   placeholder="Cari produk atau informasi..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-12 pr-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-base"
+                  className="w-full h-12 pl-12 pr-4 rounded-2xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-base"
                   suppressHydrationWarning
                 />
               </form>

@@ -53,7 +53,7 @@ const HeroSlider = () => {
     }, [emblaApi, onSelect]);
 
     return (
-        <section className="relative h-[650px] w-full overflow-hidden bg-white">
+        <section className="relative h-[400px] sm:h-[500px] lg:h-[650px] w-full overflow-hidden bg-white group/slider">
             <div className="h-full" ref={emblaRef}>
                 <div className="flex h-full">
                     {slides.map((slide, index) => (
@@ -62,7 +62,7 @@ const HeroSlider = () => {
                                 src={slide.image}
                                 alt={slide.title}
                                 fill
-                                className="object-cover object-center"
+                                className="object-cover object-center transition-transform duration-700 group-hover/slider:scale-105"
                                 priority={index === 0}
                             />
 
@@ -74,36 +74,36 @@ const HeroSlider = () => {
             </div>
 
             {/* Bottom Transition Gradient (Subtle) */}
-            <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-50/80 to-transparent z-20 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-16 md:h-24 bg-gradient-to-t from-slate-50/90 to-transparent z-20 pointer-events-none" />
 
-            {/* Navigation Controls */}
-            <div className="absolute bottom-8 right-8 z-30 flex gap-2">
+            {/* Navigation Controls - Hidden on very small screens, shown from sm up */}
+            <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-30 flex gap-2">
                 <Button
                     variant="outline"
                     size="icon"
-                    className="rounded-full bg-white/20 border-white/40 text-white hover:bg-white hover:text-blue-900 h-12 w-12"
+                    className="rounded-full bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-blue-900 h-10 w-10 md:h-12 md:w-12 transition-all"
                     onClick={scrollPrev}
                     aria-label="Slide sebelumnya"
                 >
-                    <ChevronLeft className="h-6 w-6" />
+                    <ChevronLeft className="h-5 w-5 md:h-6 md:h-6" />
                 </Button>
                 <Button
                     variant="outline"
                     size="icon"
-                    className="rounded-full bg-white/20 border-white/40 text-white hover:bg-white hover:text-blue-900 h-12 w-12"
+                    className="rounded-full bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-blue-900 h-10 w-10 md:h-12 md:w-12 transition-all"
                     onClick={scrollNext}
                     aria-label="Slide berikutnya"
                 >
-                    <ChevronRight className="h-6 w-6" />
+                    <ChevronRight className="h-5 w-5 md:h-6 md:h-6" />
                 </Button>
             </div>
 
             {/* Slide Indicators */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-1.5 md:gap-2">
                 {slides.map((_, index) => (
                     <button
                         key={index}
-                        className={`h-2.5 rounded-full transition-all duration-300 ${selectedIndex === index ? "w-8 bg-orange-500" : "w-2.5 bg-white/50"
+                        className={`h-2 md:h-2.5 rounded-full transition-all duration-300 ${selectedIndex === index ? "w-6 md:w-8 bg-orange-500" : "w-2 md:w-2.5 bg-white/40"
                             }`}
                         onClick={() => emblaApi?.scrollTo(index)}
                         aria-label={`Buka slide ${index + 1}`}
