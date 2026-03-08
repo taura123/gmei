@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ExternalLink, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { fetchGramediaNews, fetchGramediaEvents } from "@/lib/news";
 import ProxyImage from "@/components/ui/ProxyImage";
 import { motion } from "framer-motion";
 
@@ -16,13 +15,22 @@ const EventsNews = () => {
 
     useEffect(() => {
         const loadData = async () => {
-            const [apiEvents, apiNews] = await Promise.all([
-                fetchGramediaEvents(),
-                fetchGramediaNews()
-            ]);
-            setEvents(apiEvents.slice(0, 2));
-            setNews(apiNews.slice(0, 1));
-            setLoading(false);
+            try {
+                const [eventsRes, newsRes] = await Promise.all([
+                    fetch('/api/events'),
+                    fetch('/api/news')
+                ]);
+
+                const apiEvents = eventsRes.ok ? await eventsRes.json() : [];
+                const apiNews = newsRes.ok ? await newsRes.json() : [];
+
+                setEvents(apiEvents.slice(0, 2));
+                setNews(apiNews.slice(0, 1));
+            } catch (error) {
+                console.error("Error loading events/news:", error);
+            } finally {
+                setLoading(false);
+            }
         };
         loadData();
     }, []);
