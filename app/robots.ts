@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
                 disallow: ["/dashboard", "/api/", "/login"],
             },
         ],
-        sitemap: "https://gramedia-edukasi.co.id/sitemap.xml",
+        sitemap: "https://gmei.vercel.app/sitemap.xml",
     };
 }
