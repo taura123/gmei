@@ -87,5 +87,5 @@ export const authOptions: NextAuthOptions = {
             return token;
         }
     },
-    secret: process.env.NEXTAUTH_SECRET || "gramedia-mitra-secret-key-2026",
+    secret: process.env.NEXTAUTH_SECRET,
 };
