@@ -86,13 +86,19 @@ export async function scrapeGramediaProducts(urls: string[]): Promise<GramediaPr
                             href = href.startsWith('/') ? baseUrl + href : baseUrl + '/' + href;
                         }
 
-                        // Fallback text parsing
                         const rawText = (card as HTMLElement).innerText || card.textContent || '';
                         const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
 
-                        let title = lines.find(l => l.length > 10 && !/Rp|%|cashback|diskon/i.test(l));
-                        if (!title) {
-                            const withoutPrice = lines.filter(l => !/Rp|%/i.test(l));
+                        // Title extraction via preferred selectors first
+                        let title = '';
+                        const titleEl = card.querySelector('[data-testid="productCardTitle"], .list-title, .title, .product-name, h2, h3');
+                        if (titleEl && titleEl.textContent) {
+                            title = titleEl.textContent.trim();
+                        }
+
+                        // Fallback text parsing if not found
+                        if (!title || title.length < 5) {
+                            const withoutPrice = lines.filter(l => !/Rp|%|cashback|diskon/i.test(l));
                             title = withoutPrice.sort((a, b) => b.length - a.length)[0] || '';
                         }
 
