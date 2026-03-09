@@ -26,7 +26,9 @@ function extractLocation(title: string, content: string): string {
 export class SyncService {
     private static lastNewsSync = 0;
     private static lastEventsSync = 0;
+    private static lastProductsSync = 0;
     private static readonly SYNC_COOLDOWN = 15 * 60 * 1000; // 15 minutes
+    private static readonly PRODUCT_SYNC_COOLDOWN = 60 * 60 * 1000; // 1 hour for products (more expensive)
 
     static async syncNews() {
         const now = Date.now();
@@ -160,7 +162,10 @@ export class SyncService {
         }
     }
 
-    static async syncProducts() {
+    static async syncProducts(force = false) {
+        const now = Date.now();
+        if (!force && now - this.lastProductsSync < this.PRODUCT_SYNC_COOLDOWN) return;
+
         try {
             let products: any[] = [];
 
@@ -206,6 +211,7 @@ export class SyncService {
             }
 
             // Activity logging removed per user request to reduce noise
+            this.lastProductsSync = Date.now();
         } catch (error) {
             console.error("Products Sync Error:", error);
         }

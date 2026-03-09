@@ -12,7 +12,7 @@ export async function POST() {
         }
 
         console.log("[API] Manual product sync triggered");
-        await SyncService.syncProducts();
+        await SyncService.syncProducts(true);
         return NextResponse.json({
             success: true,
             message: "Sinkronisasi produk berhasil dimulai. Produk baru akan muncul segera."
