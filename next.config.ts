@@ -25,7 +25,7 @@ const securityHeaders = [
       // Fonts: self + Google Fonts
       "font-src 'self' https://fonts.gstatic.com",
       // Images: self + all configured remote image hostnames
-      "img-src 'self' data: blob: https://*.gramedia.com https://*.gramedia.net https://*.gramedia.id https://*.siplahgramedia.id https://*.amazonaws.com https://encrypted-tbn0.gstatic.com https://res.cloudinary.com https://www.googletagmanager.com",
+      "img-src 'self' data: blob: https://*.gramedia.com https://*.gramedia.net https://*.gramedia.id https://*.siplahgramedia.id https://*.amazonaws.com https://encrypted-tbn0.gstatic.com https://res.cloudinary.com https://www.googletagmanager.com https://*.tile.openstreetmap.org https://unpkg.com",
       // Connections: self + GA + Vercel
       "connect-src 'self' https://www.google-analytics.com https://vitals.vercel-analytics.com https://va.vercel-scripts.com",
       // Map tiles: OpenStreetMap for Leaflet
@@ -49,6 +49,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'encrypted-tbn0.gstatic.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'res.cloudinary.com' },
+      { protocol: 'https', hostname: '**.tile.openstreetmap.org' },
+      { protocol: 'https', hostname: 'unpkg.com' },
     ],
     formats: ['image/avif', 'image/webp'],
   },
