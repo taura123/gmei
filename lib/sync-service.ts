@@ -16,9 +16,7 @@ function extractLocation(title: string, content: string): string {
         return "Online / Webinar";
     }
     for (const city of COMMON_LOCATIONS) {
-        if (text.includes(city.toLowerCase())) {
-            return city;
-        }
+        if (text.includes(city.toLowerCase())) return city;
     }
     return "Gramedia Official";
 }
@@ -27,193 +25,122 @@ export class SyncService {
     private static lastNewsSync = 0;
     private static lastEventsSync = 0;
     private static lastProductsSync = 0;
-    private static readonly SYNC_COOLDOWN = 15 * 60 * 1000; // 15 minutes
-    private static readonly PRODUCT_SYNC_COOLDOWN = 60 * 60 * 1000; // 1 hour for products (more expensive)
+    private static readonly SYNC_COOLDOWN = 15 * 60 * 1000;
+    private static readonly PRODUCT_SYNC_COOLDOWN = 60 * 60 * 1000;
+
+    private static async fetchRss(url: string) {
+        try {
+            const { data } = await axios.get(url, {
+                timeout: 8000,
+                headers: { 'User-Agent': 'Mozilla/5.0' }
+            });
+            return Array.from(data.matchAll(/<item>([\s\S]*?)<\/item>/g)).map((m: any) => m[1]);
+        } catch (e) {
+            console.error(`[SyncService] RSS fetch error for ${url}:`, e);
+            return [];
+        }
+    }
+
+    private static parseItem(itemContent: string) {
+        const title = itemContent.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/, '$1').trim() || "";
+        const link = itemContent.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() || "";
+        const pubDate = itemContent.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]?.trim() || "";
+        const descriptionRaw = itemContent.match(/<description>([\s\S]*?)<\/description>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/, '$1') || "";
+        const imageMatch = itemContent.match(/<media:content[\s\S]*?url="([\s\S]*?)"/) || descriptionRaw.match(/<img[\s\S]*?src="([\s\S]*?)"/);
+
+        return {
+            title, link, pubDate, descriptionRaw,
+            image: imageMatch?.[1] || "/images/LOGO/LOGO GMEI (1).png",
+            description: descriptionRaw.replace(/<[^>]*>?/gm, '').substring(0, 200),
+            sourceId: Buffer.from(link).toString('base64'),
+            date: isNaN(new Date(pubDate).getTime()) ? new Date() : new Date(pubDate)
+        };
+    }
 
     static async syncNews() {
-        const now = Date.now();
-        if (now - this.lastNewsSync < this.SYNC_COOLDOWN) return;
+        if (Date.now() - this.lastNewsSync < this.SYNC_COOLDOWN) return;
+        const items = await this.fetchRss("https://www.gramedia.com/blog/feed/");
+        let created = 0;
 
-        try {
-            const response = await axios.get("https://www.gramedia.com/blog/feed/", {
-                timeout: 8000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        for (const item of items) {
+            const data = this.parseItem(item);
+            if (!isRelevant(data.title, data.descriptionRaw)) continue;
+
+            const existing = await prisma.news.findUnique({ where: { sourceId: data.sourceId } });
+            if (!existing) created++;
+
+            await prisma.news.upsert({
+                where: { sourceId: data.sourceId },
+                update: { title: data.title, description: data.description, image: data.image, date: data.date },
+                create: {
+                    sourceId: data.sourceId, title: data.title, description: data.description, content: data.descriptionRaw,
+                    image: data.image, date: data.date, category: "Info Pendidikan", isExternal: true, isPublished: true
                 }
             });
-
-            const xml = response.data;
-            const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/g);
-            let createdCount = 0;
-
-            for (const match of itemMatches) {
-                const itemContent = match[1];
-                const title = itemContent.match(/<title>([\s\S]*?)<\/title>/)?.[1]
-                    ?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/, '$1').trim() || "";
-                const link = itemContent.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() || "";
-                const pubDate = itemContent.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]?.trim() || "";
-                const descriptionRaw = itemContent.match(/<description>([\s\S]*?)<\/description>/)?.[1]
-                    ?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/, '$1') || "";
-
-                if (!isRelevant(title, descriptionRaw)) continue;
-
-                const sourceId = Buffer.from(link).toString('base64');
-                const imageMatch = itemContent.match(/<media:content[\s\S]*?url="([\s\S]*?)"/) ||
-                    descriptionRaw.match(/<img[\s\S]*?src="([\s\S]*?)"/);
-                const image = imageMatch?.[1] || "/images/LOGO/LOGO GMEI (1).png";
-                const description = descriptionRaw.replace(/<[^>]*>?/gm, '').substring(0, 200);
-
-                const itemDate = new Date(pubDate);
-                const finalDate = isNaN(itemDate.getTime()) ? new Date() : itemDate;
-
-                const existing = await prisma.news.findUnique({ where: { sourceId } });
-                if (!existing) createdCount++;
-
-                await prisma.news.upsert({
-                    where: { sourceId },
-                    update: { title, description, image, date: finalDate },
-                    create: {
-                        sourceId, title, description, content: descriptionRaw,
-                        image, date: finalDate, category: "Info Pendidikan",
-                        isExternal: true, isPublished: true
-                    }
-                });
-            }
-
-            if (createdCount > 0) {
-                await prisma.activity.create({
-                    data: {
-                        action: "SYNC",
-                        target: "NEWS",
-                        details: `Sinkronisasi berita RSS: Berhasil menambahkan ${createdCount} artikel baru.`
-                    }
-                });
-            }
-            this.lastNewsSync = Date.now();
-        } catch (error) {
-            console.error("News Sync Error:", error);
         }
+        if (created > 0) {
+            await prisma.activity.create({ data: { action: "SYNC", target: "NEWS", details: `RSS News: +${created} articles` } });
+        }
+        this.lastNewsSync = Date.now();
     }
 
     static async syncEvents() {
-        const now = Date.now();
-        if (now - this.lastEventsSync < this.SYNC_COOLDOWN) return;
+        if (Date.now() - this.lastEventsSync < this.SYNC_COOLDOWN) return;
+        const items = await this.fetchRss("https://www.gramedia.com/blog/tag/event/feed/");
+        let created = 0;
 
-        try {
-            const response = await axios.get("https://www.gramedia.com/blog/tag/event/feed/", {
-                timeout: 8000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        for (const item of items) {
+            const data = this.parseItem(item);
+            if (!isRelevant(data.title, data.descriptionRaw)) continue;
+
+            const existing = await prisma.event.findUnique({ where: { sourceId: data.sourceId } });
+            if (!existing) created++;
+
+            const loc = extractLocation(data.title, data.descriptionRaw);
+            const type = data.date < new Date() ? "Past" : "Upcoming";
+
+            await prisma.event.upsert({
+                where: { sourceId: data.sourceId },
+                update: { title: data.title, description: data.description, image: data.image, date: data.date, location: loc, type },
+                create: {
+                    sourceId: data.sourceId, title: data.title, description: data.description, content: data.descriptionRaw,
+                    image: data.image, date: data.date, location: loc, type, isExternal: true, isPublished: true, link: data.link
                 }
             });
-
-            const xml = response.data;
-            const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/g);
-            let createdCount = 0;
-
-            for (const match of itemMatches) {
-                const itemContent = match[1];
-                const title = itemContent.match(/<title>([\s\S]*?)<\/title>/)?.[1]
-                    ?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/, '$1').trim() || "";
-                const link = itemContent.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() || "";
-                const pubDate = itemContent.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]?.trim() || "";
-                const descriptionRaw = itemContent.match(/<description>([\s\S]*?)<\/description>/)?.[1]
-                    ?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/, '$1') || "";
-
-                if (!isRelevant(title, descriptionRaw)) continue;
-
-                const sourceId = Buffer.from(link).toString('base64');
-                const imageMatch = itemContent.match(/<media:content[\s\S]*?url="([\s\S]*?)"/) ||
-                    descriptionRaw.match(/<img[\s\S]*?src="([\s\S]*?)"/);
-                const image = imageMatch?.[1] || "/images/LOGO/LOGO GMEI (1).png";
-                const description = descriptionRaw.replace(/<[^>]*>?/gm, '').substring(0, 200);
-
-                const itemDate = new Date(pubDate);
-                const finalDate = isNaN(itemDate.getTime()) ? new Date() : itemDate;
-                const eventType = finalDate < new Date() ? "Past" : "Upcoming";
-                const extractedLocation = extractLocation(title, descriptionRaw);
-
-                const existing = await prisma.event.findUnique({ where: { sourceId } });
-                if (!existing) createdCount++;
-
-                await prisma.event.upsert({
-                    where: { sourceId },
-                    update: { title, description, image, date: finalDate, location: extractedLocation, type: eventType },
-                    create: {
-                        sourceId, title, description, content: descriptionRaw,
-                        image, date: finalDate, location: extractedLocation,
-                        type: eventType, isExternal: true, isPublished: true, link
-                    }
-                });
-            }
-
-            if (createdCount > 0) {
-                await prisma.activity.create({
-                    data: {
-                        action: "SYNC",
-                        target: "EVENT",
-                        details: `Sinkronisasi event RSS: Berhasil menambahkan ${createdCount} event baru.`
-                    }
-                });
-            }
-            this.lastEventsSync = Date.now();
-        } catch (error) {
-            console.error("Events Sync Error:", error);
         }
+        if (created > 0) {
+            await prisma.activity.create({ data: { action: "SYNC", target: "EVENT", details: `RSS Events: +${created} events` } });
+        }
+        this.lastEventsSync = Date.now();
     }
 
     static async syncProducts(force = false) {
-        const now = Date.now();
-        if (!force && now - this.lastProductsSync < this.PRODUCT_SYNC_COOLDOWN) return;
+        if (!force && Date.now() - this.lastProductsSync < this.PRODUCT_SYNC_COOLDOWN) return;
 
+        const products: any[] = [];
         try {
-            let products: any[] = [];
+            const { scrapeSiplahProducts } = await import("./siplah-scraper");
+            products.push(...await scrapeSiplahProducts());
 
-            // 1. Scrape Siplah Gramedia
-            try {
-                const { scrapeSiplahProducts } = await import("./siplah-scraper");
-                const siplahProducts = await scrapeSiplahProducts();
-                products.push(...siplahProducts);
-            } catch (e) {
-                console.error("[SyncService] Failed to scrape SIPLah", e);
-            }
-
-            // 2. Scrape main Gramedia.com
-            try {
-                const { scrapeGramediaProducts } = await import("./gramedia-scraper");
-                const gramediaUrls = [
-                    "https://www.gramedia.com/search?q=smp",
-                    "https://www.gramedia.com/search?q=buku+sd",
-                    "https://www.gramedia.com/search?q=sma",
-                    "https://www.gramedia.com/categories/kerajinan-keterampilan"
-                ];
-                const gramediaProducts = await scrapeGramediaProducts(gramediaUrls);
-                products.push(...gramediaProducts);
-            } catch (e) {
-                console.error("[SyncService] Failed to scrape Gramedia.com", e);
-            }
-
-            if (products.length === 0) {
-                products = [
-                    { title: "Buku Pintar Pelajaran SD/Mi 5 In 1", description: "Buku panduan lengkap...", price: 83700, image: "https://cdn.gramedia.com/uploads/items/9789797953461.jpg", category: "Educational Books", subcategory: "Katalog SD", link: "https://www.gramedia.com/products/buku-pintar-pelajaran-sd-mi-5-in-1" }
-                ];
-            }
-
-            let syncCount = 0;
-            for (const product of products) {
-                const slug = product.title.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 100);
-                await prisma.product.upsert({
-                    where: { id: slug },
-                    update: { description: product.description, price: product.price, image: product.image, category: product.category, subcategory: product.subcategory, link: product.link },
-                    create: { id: slug, title: product.title, description: product.description, price: product.price, image: product.image, category: product.category, subcategory: product.subcategory, link: product.link }
-                });
-                syncCount++;
-            }
-
-            // Activity logging removed per user request to reduce noise
-            this.lastProductsSync = Date.now();
-        } catch (error) {
-            console.error("Products Sync Error:", error);
+            const { scrapeGramediaProducts } = await import("./gramedia-scraper");
+            products.push(...await scrapeGramediaProducts([
+                "https://www.gramedia.com/search?q=smp",
+                "https://www.gramedia.com/search?q=buku+sd",
+                "https://www.gramedia.com/search?q=sma",
+                "https://www.gramedia.com/categories/kerajinan-keterampilan"
+            ]));
+        } catch (e) {
+            console.error("[SyncService] Product sync failed:", e);
         }
+
+        for (const p of products) {
+            const id = p.title.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 100);
+            await prisma.product.upsert({
+                where: { id },
+                update: { description: p.description, price: p.price, image: p.image, category: p.category, subcategory: p.subcategory, link: p.link },
+                create: { id, title: p.title, description: p.description, price: p.price, image: p.image, category: p.category, subcategory: p.subcategory, link: p.link }
+            });
+        }
+        this.lastProductsSync = Date.now();
     }
 }

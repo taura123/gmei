@@ -1,29 +1,4 @@
-import puppeteer from 'puppeteer-core';
-
-// Find Chrome executable path on Windows
-const CHROME_PATHS = [
-    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-    'C:\\Users\\' + (process.env.USERNAME || 'HP') + '\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe',
-];
-
-function getChromePath(): string {
-    const { existsSync } = require('fs');
-
-    if (process.env.CHROME_EXECUTABLE_PATH && existsSync(process.env.CHROME_EXECUTABLE_PATH)) {
-        return process.env.CHROME_EXECUTABLE_PATH;
-    }
-
-    for (const p of CHROME_PATHS) {
-        if (existsSync(p)) return p;
-    }
-
-    const linuxPath = '/usr/bin/google-chrome';
-    if (existsSync(linuxPath)) return linuxPath;
-
-    throw new Error('Chrome not found. Install Google Chrome or set CHROME_EXECUTABLE_PATH.');
-    return ''; // To satisfy TS
-}
+import { launchBrowser } from './browser-utils';
 
 export interface GramediaProduct {
     title: string;
@@ -37,20 +12,7 @@ export interface GramediaProduct {
 }
 
 export async function scrapeGramediaProducts(urls: string[]): Promise<GramediaProduct[]> {
-    const browser = await puppeteer.launch({
-        executablePath: getChromePath(),
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--disable-gpu',
-        ],
-    });
-
+    const browser = await launchBrowser();
     const products: GramediaProduct[] = [];
 
     try {
@@ -63,13 +25,14 @@ export async function scrapeGramediaProducts(urls: string[]): Promise<GramediaPr
             console.log('[Gramedia Scraper] Navigating to:', url);
             await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-            // Wait a few seconds for hydration/rendering
             try {
                 await page.waitForSelector('a[href*="/products/"]', { timeout: 15000 });
             } catch (e) {
                 console.log('[Gramedia Scraper] Could not find products on ', url);
+                continue;
             }
-            // Small scroll to trigger initial lazy images
+
+            // Scroll to trigger lazy loading
             await page.evaluate(() => window.scrollBy(0, 1500));
             await new Promise(res => setTimeout(res, 2000));
 
@@ -89,18 +52,20 @@ export async function scrapeGramediaProducts(urls: string[]): Promise<GramediaPr
                         const rawText = (card as HTMLElement).innerText || card.textContent || '';
                         const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
 
-                        // Title extraction via preferred selectors first
+                        // Title extraction via preferred selectors
                         let title = '';
                         const titleEl = card.querySelector('[data-testid="productCardTitle"], .list-title, .title, .product-name, h2, h3');
                         if (titleEl && titleEl.textContent) {
                             title = titleEl.textContent.trim();
                         }
 
-                        // Fallback text parsing if not found
+                        // Fallback title hunt
                         if (!title || title.length < 5) {
                             const withoutPrice = lines.filter(l => !/Rp|%|cashback|diskon/i.test(l));
                             title = withoutPrice.sort((a, b) => b.length - a.length)[0] || '';
                         }
+
+                        if (!title || title.length < 5) return;
 
                         let priceNum: number | null = null;
                         const priceLine = lines.find(l => /Rp/i.test(l));
@@ -111,13 +76,8 @@ export async function scrapeGramediaProducts(urls: string[]): Promise<GramediaPr
                             }
                         }
 
-                        if (!title || title.length < 5) return;
-
-                        let image = '';
                         const img = card.querySelector('img');
-                        if (img) {
-                            image = img.src || img.getAttribute('data-src') || '';
-                        }
+                        const image = img?.src || img?.getAttribute('data-src') || '';
 
                         let category = 'Educational Books';
                         let subcategory = 'Katalog Umum';
@@ -133,11 +93,10 @@ export async function scrapeGramediaProducts(urls: string[]): Promise<GramediaPr
                             subcategory = 'Prakarya & Kewirausahaan';
                         }
 
-                        if (title.length > 150) title = title.substring(0, 147) + '...';
                         const sourceId = (title || 'gramedia').substring(0, 50);
 
                         results.push({
-                            title,
+                            title: title.length > 150 ? title.substring(0, 147) + '...' : title,
                             description: `Temukan ${title} di Gramedia.com. Kategori: ${category} > ${subcategory}`,
                             price: priceNum,
                             image: image || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop',
@@ -146,7 +105,6 @@ export async function scrapeGramediaProducts(urls: string[]): Promise<GramediaPr
                             link: href || baseUrl,
                             sourceId
                         });
-
                     } catch (e) { }
                 });
 
@@ -163,7 +121,6 @@ export async function scrapeGramediaProducts(urls: string[]): Promise<GramediaPr
             }
             products.push(...Array.from(unique.values()));
         }
-
     } catch (error) {
         console.error('[Gramedia Scraper] Error details:', error);
     } finally {
