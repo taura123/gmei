@@ -163,10 +163,30 @@ export class SyncService {
     static async syncProducts() {
         try {
             let products: any[] = [];
+
+            // 1. Scrape Siplah Gramedia
             try {
                 const { scrapeSiplahProducts } = await import("./siplah-scraper");
-                products = await scrapeSiplahProducts();
-            } catch (e) { }
+                const siplahProducts = await scrapeSiplahProducts();
+                products.push(...siplahProducts);
+            } catch (e) {
+                console.error("[SyncService] Failed to scrape SIPLah", e);
+            }
+
+            // 2. Scrape main Gramedia.com
+            try {
+                const { scrapeGramediaProducts } = await import("./gramedia-scraper");
+                const gramediaUrls = [
+                    "https://www.gramedia.com/search?q=smp",
+                    "https://www.gramedia.com/search?q=buku+sd",
+                    "https://www.gramedia.com/search?q=sma",
+                    "https://www.gramedia.com/categories/kerajinan-keterampilan"
+                ];
+                const gramediaProducts = await scrapeGramediaProducts(gramediaUrls);
+                products.push(...gramediaProducts);
+            } catch (e) {
+                console.error("[SyncService] Failed to scrape Gramedia.com", e);
+            }
 
             if (products.length === 0) {
                 products = [
