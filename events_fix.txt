@@ -1,0 +1,48 @@
+﻿commit 818ee0e83d0cc4c38a6dc164f560908472a2e532
+Author: taura123 <raptaura@gmail.com>
+Date:   Sun Mar 8 20:46:45 2026 +0700
+
+    Fix Vercel build error by moving server fetches to API routes
+
+diff --git a/components/sections/EventsNews.tsx b/components/sections/EventsNews.tsx
+index d8940cc..0f8a168 100644
+--- a/components/sections/EventsNews.tsx
++++ b/components/sections/EventsNews.tsx
+@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
+ import { ArrowRight, ExternalLink, ChevronRight } from "lucide-react";
+ import Link from "next/link";
+ import { useEffect, useState } from "react";
+-import { fetchGramediaNews, fetchGramediaEvents } from "@/lib/news";
+ import ProxyImage from "@/components/ui/ProxyImage";
+ import { motion } from "framer-motion";
+ 
+@@ -16,13 +15,22 @@ const EventsNews = () => {
+ 
+     useEffect(() => {
+         const loadData = async () => {
+-            const [apiEvents, apiNews] = await Promise.all([
+-                fetchGramediaEvents(),
+-                fetchGramediaNews()
+-            ]);
+-            setEvents(apiEvents.slice(0, 2));
+-            setNews(apiNews.slice(0, 1));
+-            setLoading(false);
++            try {
++                const [eventsRes, newsRes] = await Promise.all([
++                    fetch('/api/events'),
++                    fetch('/api/news')
++                ]);
++
++                const apiEvents = eventsRes.ok ? await eventsRes.json() : [];
++                const apiNews = newsRes.ok ? await newsRes.json() : [];
++
++                setEvents(apiEvents.slice(0, 2));
++                setNews(apiNews.slice(0, 1));
++            } catch (error) {
++                console.error("Error loading events/news:", error);
++            } finally {
++                setLoading(false);
++            }
+         };
+         loadData();
+     }, []);

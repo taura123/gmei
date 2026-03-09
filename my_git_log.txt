@@ -1,0 +1,10 @@
+eba02f7 Optimize UI scaling for mobile viewports
+818ee0e Fix Vercel build error by moving server fetches to API routes
+baa9a01 Fix mobile menu visibility
+7478c46 feat: final polish for mobile layout responsiveness and aesthetics
+0a845ae feat: improve mobile responsiveness for Navbar, HeroSlider, and UserSegments
+57b2702 feat: add Vercel Speed Insights to root layout
+cf39fde feat: setup vercel analytics
+f6f4879 fix: update robots.txt sitemap url to match current domain
+9b99bbf feat: implement 2-hour session timeout for automatic logout
+733a61c feat: improve dashboard traffic sources and device category interactive tooltips

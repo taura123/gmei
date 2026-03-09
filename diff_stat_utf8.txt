@@ -1,0 +1,38 @@
+﻿commit 0a845aef3c0f2c9806485c6d612f2ffb4c88f52f
+Author: taura123 <raptaura@gmail.com>
+Date:   Sun Mar 8 15:26:09 2026 +0700
+
+    feat: improve mobile responsiveness for Navbar, HeroSlider, and UserSegments
+
+ components/layout/Navbar.tsx         | 20 ++++++++++----------
+ components/sections/HeroSlider.tsx   | 22 +++++++++++-----------
+ components/sections/UserSegments.tsx | 24 +++++++++++++-----------
+ package-lock.json                    | 35 +++++++++++++++++++++++++++++++++++
+ package.json                         |  1 +
+ test-ga.js                           | 28 ++++++++++++++++++++++++++++
+ 6 files changed, 98 insertions(+), 32 deletions(-)
+
+commit 7478c46ec94894477c150349836385895588c716
+Author: taura123 <raptaura@gmail.com>
+Date:   Sun Mar 8 15:34:33 2026 +0700
+
+    feat: final polish for mobile layout responsiveness and aesthetics
+
+ components/sections/EventsNews.tsx      | 72 ++++++++++++++++-----------------
+ components/sections/ProductShowcase.tsx | 60 ++++++++++++++-------------
+ components/sections/UserSegments.tsx    | 14 +++----
+ 3 files changed, 74 insertions(+), 72 deletions(-)
+
+commit baa9a0147baef3a16c0c77c7fecf0ce51cf70310
+Author: taura123 <raptaura@gmail.com>
+Date:   Sun Mar 8 20:37:35 2026 +0700
+
+    Fix mobile menu visibility
+
+ components/layout/Navbar.tsx            | 238 ++++++++++++++-------------
+ components/sections/EventsNews.tsx      | 283 +++++++++++++++++++-------------
+ components/sections/HeroSlider.tsx      | 115 +++++++++----
+ components/sections/ProductShowcase.tsx | 110 +++++++++----
+ components/sections/UserSegments.tsx    |  60 +++++--
+ test-dom.js                             |  15 ++
+ 6 files changed, 507 insertions(+), 314 deletions(-)

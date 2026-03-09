@@ -13,7 +13,15 @@ export async function GET() {
             where: { isPublished: true },
             orderBy: { date: 'desc' }
         });
-        return NextResponse.json(events);
+
+        // Dynamically compute type based on current date
+        const now = new Date();
+        const eventsWithType = events.map(event => ({
+            ...event,
+            type: new Date(event.date) < now ? "Past" : "Upcoming"
+        }));
+
+        return NextResponse.json(eventsWithType);
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
     }
