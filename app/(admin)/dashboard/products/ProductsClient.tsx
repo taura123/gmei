@@ -247,14 +247,7 @@ export default function ProductsClient() {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleSyncProducts}
-                            disabled={syncingProducts}
-                            className="flex items-center gap-2 px-4 py-2 bg-[#1E4198] text-white rounded-2xl shadow-sm hover:bg-blue-700 transition-all font-bold text-sm disabled:opacity-60 h-12"
-                        >
-                            <Download className={`h-4 w-4 ${syncingProducts ? 'animate-bounce' : ''}`} />
-                            {syncingProducts ? 'Menyinkronkan...' : 'Produk SIPLah'}
-                        </button>
+
                         <div className="flex items-center bg-emerald-50 rounded-2xl p-1 border border-emerald-100 h-12 shadow-sm">
                             <select
                                 value={exportFormat}
@@ -361,21 +354,15 @@ export default function ProductsClient() {
                                                 <div className="flex items-center gap-4">
                                                     <div className="h-14 w-14 rounded-2xl bg-slate-100 flex-shrink-0 relative overflow-hidden ring-1 ring-slate-100 group-hover:ring-blue-100 transition-all">
                                                         {product.image ? (
-                                                            product.image.startsWith('http') ? (
-                                                                <img
-                                                                    src={product.image}
-                                                                    alt={product.title}
-                                                                    className="w-full h-full object-cover"
-                                                                    referrerPolicy="no-referrer"
-                                                                />
-                                                            ) : (
+                                                            <div className="relative w-full h-full">
                                                                 <Image
                                                                     src={product.image}
                                                                     alt={product.title}
                                                                     fill
-                                                                    className="object-cover"
+                                                                    className="object-contain"
+                                                                    unoptimized={product.image.startsWith('http')}
                                                                 />
-                                                            )
+                                                            </div>
                                                         ) : (
                                                             <div className="absolute inset-0 flex items-center justify-center text-slate-300 font-black text-xs uppercase">
                                                                 IMG

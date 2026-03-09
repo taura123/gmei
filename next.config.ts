@@ -25,7 +25,7 @@ const securityHeaders = [
       // Fonts: self + Google Fonts
       "font-src 'self' https://fonts.gstatic.com",
       // Images: self + all configured remote image hostnames
-      "img-src 'self' data: blob: https://*.gramedia.com https://*.gramedia.id https://*.siplahgramedia.id https://*.amazonaws.com https://encrypted-tbn0.gstatic.com https://res.cloudinary.com https://www.googletagmanager.com",
+      "img-src 'self' data: blob: https://*.gramedia.com https://*.gramedia.net https://*.gramedia.id https://*.siplahgramedia.id https://*.amazonaws.com https://encrypted-tbn0.gstatic.com https://res.cloudinary.com https://www.googletagmanager.com",
       // Connections: self + GA + Vercel
       "connect-src 'self' https://www.google-analytics.com https://vitals.vercel-analytics.com https://va.vercel-scripts.com",
       // Map tiles: OpenStreetMap for Leaflet
@@ -41,6 +41,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'www.gramedia.com' },
       { protocol: 'https', hostname: 'cdn.gramedia.com' },
       { protocol: 'https', hostname: '**.gramedia.com' },
+      { protocol: 'https', hostname: '**.gramedia.net' },
       { protocol: 'https', hostname: '**.gramedia.id' },
       { protocol: 'https', hostname: 'siplahgramedia.id' },
       { protocol: 'https', hostname: '**.siplahgramedia.id' },
