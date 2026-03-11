@@ -442,8 +442,7 @@ export default function DashboardClient() {
                         <div className="flex justify-around items-end h-32 gap-4">
                             {[
                                 { key: "mobile", icon: <Smartphone />, label: "Mobile" },
-                                { key: "desktop", icon: <Monitor />, label: "Desktop" },
-                                { key: "tablet", icon: <Laptop />, label: "Tablet" }
+                                { key: "desktop", icon: <Monitor />, label: "Desktop" }
                             ].map((dev, i) => {
                                 const val = analyticsData?.devices?.[dev.key] || 0;
                                 const total = analyticsData?.devices ?

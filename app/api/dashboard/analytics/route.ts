@@ -63,8 +63,12 @@ export async function GET() {
                 sessions: totalResponse.rows?.[0]?.metricValues?.[2]?.value || 0,
             },
             devices: response.rows?.reduce((acc: any, row: any) => {
-                const device = row.dimensionValues[0].value;
+                let device = row.dimensionValues[0].value.toLowerCase();
                 const value = parseInt(row.metricValues[0].value);
+
+                // Merge tablet into desktop (Desktop now includes PC + Tablet/Laptop)
+                if (device === "tablet") device = "desktop";
+
                 acc[device] = (acc[device] || 0) + value;
                 return acc;
             }, {}),
